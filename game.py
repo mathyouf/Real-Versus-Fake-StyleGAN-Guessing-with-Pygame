@@ -4,6 +4,16 @@ import os, random, time
 pygame.init()
 score  = 0
 IsItReal = True
+
+colors = {
+    "black": (255,255,255),
+    "grey": (155,155,155)
+}
+
+allGuesses = []
+correctGuesses = []
+wrongGuesses = []
+
 def createArrows(colors, highlight):
     x = 600
     y = 660
@@ -26,6 +36,7 @@ def createArrows(colors, highlight):
             pygame.draw.polygon(screen, (100*highlighted, 0, 0), ((x-0, y-100), (x-0, y-200), (x-200, y-200), (x-200, y-250), (x-300, y-150), (x-200, y-50), (x-200, y-100)))
             screen.blit(text, (x-200,y-200))
     pygame.display.flip()
+
 def renderNewFace():
     global IsItReal
     IsItReal = random.choice([True, False])
@@ -35,25 +46,44 @@ def renderNewFace():
         path = "C:/Users/MatthewFisher/Desktop/DeepLearning/RealVFake/pictures/fake/5veryhard/"
     face = random.choice([x for x in os.listdir(path) if os.path.isfile(os.path.join(path, x))])
     faceimg = pygame.image.load(path + face)
+    allGuesses.append(faceimg)
     faceimg = pygame.transform.scale(faceimg, (600,600))
     screen.blit(faceimg, (225,100))
+
 def checkResult(MyGuess):
     global score
     global IsItReal
     time.sleep(0.2)
     if MyGuess == IsItReal:
         score += 1
+        correctGuesses.append(allGuesses[-1])
     else:
         score -= 1
-    renderScore()
+        wrongGuesses.append(allGuesses[-1])
+
 def renderScore():
-    print(str(score))
-    font = pygame.font.Font('C:/Users/MatthewFisher/Desktop/DeepLearning/RealVFake/fonts/OpenSans-Bold.ttf', 70)
-    text = font.render('Score: ' + str(score), True, (255,255,255), (155,155,155)) 
-    screen.blit(text, (430, 0))
+    newString = 'Score: ' + str(score)
+    writeText(string=newString, location=(430, 0), font_color=colors["black"],bg_color=colors["grey"], font="OpenSans", size=70)
+
 def resetScreen():
+    screen.fill((155,155,155))
     renderNewFace()
     createArrows(['green','red'],highlight=False)
+    for index, guess in enumerate(allGuesses):
+        face = pygame.transform.scale(guess, (100,100))
+        pos = 110*index+10
+        print(pos)
+        screen.blit(face,(pos, 10))
+    # renderScore()
+
+def writeText(string, location, font_color, bg_color, font, size):
+    if font == 'OpenSans':
+        font = pygame.font.Font('C:/Users/MatthewFisher/Desktop/DeepLearning/RealVFake/fonts/OpenSans-Bold.ttf', size)
+    else:
+        font = pygame.font.Font('C:/Users/MatthewFisher/Desktop/DeepLearning/RealVFake/fonts/proxima_nova.ttf', size)
+    print(string)
+    text = font.render(string, True, font_color, bg_color) 
+    screen.blit(text, location)
 
 GameOn = True
 screen = pygame.display.set_mode(size=(1080,920))
